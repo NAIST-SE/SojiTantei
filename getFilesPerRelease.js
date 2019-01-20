@@ -1,7 +1,6 @@
 var nodegit = require('nodegit');
 var fs = require('fs');
-
-var directory = '/mnt/yantra/npm/projects/npm/';
+var config = require('./configuration');
 
 async function getFileList() {
 	// This code walks the history of the master branch and prints results
@@ -10,7 +9,7 @@ async function getFileList() {
 	var libraryName = process.argv[2];
 	// var libraryName = 'angular';
 	if (libraryName) {
-		nodegit.Repository.open(directory + libraryName + '/.git')
+		nodegit.Repository.open(config.directory + libraryName + '/.git')
 			.then(function(repo) {
 				return repo.getMasterCommit();
 			})
@@ -44,50 +43,52 @@ async function getFileList() {
 					if (!commitList[version]) commitList[version] = prevSha;
 					console.log(commitList);
 					var directoryName = 'fileLists/' + libraryName;
+					if (!fs.existsSync('fileLists')) {
+						fs.mkdirSync('fileLists');
+					}
 					if (!fs.existsSync(directoryName)) {
 						fs.mkdirSync(directoryName);
 					}
 
-					nodegit.Repository.open(directory + libraryName + '/.git').then(
-						async function(repo) {
-							for (var commitVersion in commitList) {
-								await repo
-									.getCommit(commitList[commitVersion])
-									.then(function(commit) {
-										var tmpSha = commitList[commitVersion];
-										var fileName =
-											directoryName + '/R_' + commitVersion + '.txt';
-										var listTmp = [];
-										commit.getTree().then(function(tree) {
-											var walker = tree.walk();
-											walker.on('entry', function(entry) {
-												var ext = entry
-													.path()
-													.substr(entry.path().lastIndexOf('.') + 1);
-												if (ext === 'js' || ext === 'jsx') {
-													listTmp.push(entry.path());
-												}
-											});
-											walker.on('end', function() {
-												fs.writeFile(
-													fileName,
-													tmpSha +
-														'\n' +
-														listTmp
-															.sort()
-															.toString()
-															.replace(/,/g, '\n'),
-													function(err) {
-														if (err) throw err;
-													}
-												);
-											});
-											walker.start();
+					nodegit.Repository.open(
+						config.directory + libraryName + '/.git'
+					).then(async function(repo) {
+						for (var commitVersion in commitList) {
+							await repo
+								.getCommit(commitList[commitVersion])
+								.then(function(commit) {
+									var tmpSha = commitList[commitVersion];
+									var fileName = directoryName + '/R_' + commitVersion + '.txt';
+									var listTmp = [];
+									commit.getTree().then(function(tree) {
+										var walker = tree.walk();
+										walker.on('entry', function(entry) {
+											var ext = entry
+												.path()
+												.substr(entry.path().lastIndexOf('.') + 1);
+											if (ext === 'js' || ext === 'jsx') {
+												listTmp.push(entry.path());
+											}
 										});
+										walker.on('end', function() {
+											fs.writeFile(
+												fileName,
+												tmpSha +
+													'\n' +
+													listTmp
+														.sort()
+														.toString()
+														.replace(/,/g, '\n'),
+												function(err) {
+													if (err) throw err;
+												}
+											);
+										});
+										walker.start();
 									});
-							}
+								});
 						}
-					);
+					});
 				});
 
 				// Don't forget to call `start()`!

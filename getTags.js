@@ -1,7 +1,6 @@
 var nodegit = require('nodegit');
 var fs = require('fs');
-
-var directory = '/mnt/yantra/npm/projects/npm/';
+var config = require('./configuration');
 
 function getFileList() {
 	// This code walks the history of the master branch and prints results
@@ -9,7 +8,7 @@ function getFileList() {
 	var commitList = {};
 	var libraryName = process.argv[2];
 	if (libraryName) {
-		nodegit.Repository.open(directory + libraryName + '/.git')
+		nodegit.Repository.open(config.directory + libraryName + '/.git')
 			.then(function(repo) {
 				nodegit.Tag.list(repo).then(async function(tag_list) {
 					const tmpList = tag_list.map(tag => tag.replace('v', '')).sort();

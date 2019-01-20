@@ -4,6 +4,7 @@ let functionExtractor = require('function-extractor');
 var escomplex = require('escomplex');
 let sortObject = require('sort-object');
 let diff = require('deep-diff');
+var config = require('./configuration');
 
 let functionsList = {};
 let libraryName = '';
@@ -14,7 +15,7 @@ function getFileList() {
 	passedFiles = process.argv.slice(3);
 	if (libraryName) {
 		let repository = nodegit.Repository.open(
-			'/mnt/yantra/rodrigo-e/LibraryTool/npm/' + libraryName + '/.git'
+			config.directory + libraryName + '/.git'
 		);
 		let fileLists =
 			passedFiles.length > 0
@@ -52,7 +53,7 @@ async function getFunctions() {
 	let libraryName = process.argv[2];
 	let list = getFileList();
 	let repository = nodegit.Repository.open(
-		'/mnt/yantra/rodrigo-e/LibraryTool/npm/' + libraryName + '/.git'
+		config.directory + libraryName + '/.git'
 	);
 	for (let element in list) {
 		await repository.then(async function(repo) {
@@ -130,6 +131,9 @@ function test() {
 	getFunctions()
 		.then(() => {
 			let directoryName = 'filesComparison/' + libraryName;
+			if (!fs.existsSync('filesComparison')) {
+				fs.mkdirSync('filesComparison');
+			}
 			if (!fs.existsSync(directoryName)) {
 				fs.mkdirSync(directoryName);
 			}
@@ -214,7 +218,7 @@ function test() {
 							break;
 
 						default:
-							console.log("That kind doesn't exist");
+							console.log('That kind doesn\'t exist');
 							break;
 					}
 				}

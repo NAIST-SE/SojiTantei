@@ -1,8 +1,8 @@
 let nodegit = require('nodegit');
 let fs = require('fs');
 let esprima = require('esprima');
+var config = require('./configuration');
 
-var directory = '/mnt/yantra/npm/projects/npm/';
 function getFileList() {
 	let list = {};
 	let libraryName = process.argv[2];
@@ -181,7 +181,9 @@ const findMethodValue = (variable, object, result = {}) => {
 async function getFunctions() {
 	let libraryName = process.argv[2];
 	let list = getFileList();
-	let repository = nodegit.Repository.open(directory + libraryName + '/.git');
+	let repository = nodegit.Repository.open(
+		config.directory + libraryName + '/.git'
+	);
 
 	var directoryName = 'filesMethods/' + libraryName;
 	if (!fs.existsSync(directoryName)) {
