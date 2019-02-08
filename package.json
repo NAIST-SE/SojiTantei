@@ -9,7 +9,9 @@
 	"author": "Rodrigo Elizalde Zapata",
 	"license": "ISC",
 	"dependencies": {
+		"deep-diff": "^1.0.2",
 		"esprima": "^4.0.1",
+		"function-extractor": "0.0.5",
 		"nodegit": "^0.24.0"
 	}
 }
