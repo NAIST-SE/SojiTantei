@@ -6,10 +6,21 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"author": "Rodrigo Elizalde Zapata",
+	"author": [
+        "Rodrigo Elizalde Zapata",
+        "Bodin Chinthanet"
+    ],
 	"license": "ISC",
 	"dependencies": {
+		"deep-diff": "^1.0.2",
+		"escomplex": "^2.0.0-alpha",
 		"esprima": "^4.0.1",
-		"nodegit": "^0.24.0"
+		"function-extractor": "0.0.5",
+		"nodegit": "^0.24.0",
+		"sort-object": "^3.0.3"
+	},
+	"engines": {
+		"node": "10.24.1",
+		"npm": "6.14.12"
 	}
 }
