@@ -1,8 +1,8 @@
 let nodegit = require('nodegit');
 let fs = require('fs');
 let functionExtractor = require('function-extractor');
-var escomplex = require('escomplex');
-let sortObject = require('sort-object');
+//var escomplex = require('escomplex');
+//let sortObject = require('sort-object');
 let diff = require('deep-diff');
 var config = require('./configuration');
 
@@ -12,7 +12,7 @@ let libraryName = '';
 function getFileList() {
 	let list = {};
 	libraryName = process.argv[2];
-	passedFiles = process.argv.slice(3);
+	var passedFiles = process.argv.slice(3);
 	if (libraryName) {
 		let repository = nodegit.Repository.open(
 			config.directory + libraryName + '/.git'
