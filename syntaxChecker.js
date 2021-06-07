@@ -186,6 +186,9 @@ async function getFunctions() {
 	);
 
 	var directoryName = 'filesMethods/' + libraryName;
+    if(!fs.existsSync('filesMethods')) {
+		fs.mkdirSync('filesMethods');
+    }
 	if (!fs.existsSync(directoryName)) {
 		fs.mkdirSync(directoryName);
 	}
