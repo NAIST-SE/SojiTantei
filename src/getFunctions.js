@@ -4,7 +4,7 @@ let functionExtractor = require('function-extractor');
 //var escomplex = require('escomplex');
 //let sortObject = require('sort-object');
 let diff = require('deep-diff');
-var config = require('./configuration');
+var config = require('./../configuration');
 
 let functionsList = {};
 let libraryName = '';

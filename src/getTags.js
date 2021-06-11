@@ -1,6 +1,6 @@
 var nodegit = require('nodegit');
 var fs = require('fs');
-var config = require('./configuration');
+var config = require('./../configuration');
 
 function getFileList() {
 	// This code walks the history of the master branch and prints results

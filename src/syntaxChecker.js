@@ -1,7 +1,7 @@
 let nodegit = require('nodegit');
 let fs = require('fs');
 let esprima = require('esprima');
-var config = require('./configuration');
+var config = require('./../configuration');
 
 function getFileList() {
 	let list = {};
