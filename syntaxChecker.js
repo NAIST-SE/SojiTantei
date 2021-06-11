@@ -76,6 +76,7 @@ const findRequestValue = object => {
 		finish: false,
 		value: '',
 		method: '',
+        loc: null,
 		libraryFound: false,
 		requireFound: false
 	};
@@ -84,12 +85,12 @@ const findRequestValue = object => {
 
 		if (result.libraryFound && key === 'property') {
 			if (object[key].name) {
-				return { ...result, finish: true, method: object[key].name };
+				return { ...result, finish: true, method: object[key].name, loc: object[key].loc};
 			}
 		}
 
 		if (result.requireFound && key === 'arguments' && !result.libraryFound) {
-			result = { ...result, value: object[key][0].value, libraryFound: true };
+			result = { ...result, value: object[key][0].value, libraryFound: true , loc: object[key][0].loc};
 		}
 
 		if (
@@ -97,7 +98,7 @@ const findRequestValue = object => {
 			object[key].name === 'require' &&
 			!result.requireFound
 		) {
-			result = { ...result, requireFound: true };
+			result = { ...result, requireFound: true};
 		}
 
 		if (typeof value === 'object' && !result.requireFound) {
@@ -105,7 +106,7 @@ const findRequestValue = object => {
 		}
 
 		if (key === 'callee' && result.value) {
-			return { ...result, finish: true };
+			return { ...result, finish: true, loc: object[key].loc};
 		}
 
 		if (result.finish) return result;
@@ -115,11 +116,12 @@ const findRequestValue = object => {
 };
 
 const getRequestData = object => {
-	var result = { variable: null, library: null, method: null };
+	var result = { variable: null, library: null, method: null, loc: null};
 	var isVariable = false;
 	var gotVariable = false;
 	var variableName = '';
 	var libraryName = '';
+    var loc = null;
 	for (var key in object) {
 		var value = object[key];
 
@@ -128,7 +130,8 @@ const getRequestData = object => {
 			return {
 				variable: variableName,
 				library: libraryName.value,
-				method: libraryName.method
+				method: libraryName.method,
+                loc: libraryName.loc
 			};
 		}
 
@@ -200,15 +203,16 @@ async function getFunctions() {
 				var fileName = directoryName + '/' + element;
 				var logFile = fs.createWriteStream(fileName, { flags: 'w' });
 				for (let file in list[element].files) {
+                    const jsFileName = list[element].files[file];
 					logFile.write('------------------------------------------\n');
-					logFile.write(list[element].files[file] + '\n');
+					logFile.write(jsFileName + '\n');
 					logFile.write('------------------------------------------\n');
 					await commit
 						.getEntry(list[element].files[file])
 						.then(async function(entry) {
 							await entry.getBlob().then(async function(blob) {
 								try {
-									var parsedScript = esprima.parseScript(blob.toString());
+									var parsedScript = esprima.parseScript(blob.toString(), { loc: true });
 								} catch (err) {
 									var error = err;
 								}
@@ -233,10 +237,13 @@ async function getFunctions() {
 									variableNames
 										.filter(element => element.method !== '')
 										.forEach(element => {
-											methodCallNames[element.library] = {
-												...methodCallNames[element.library],
-												[element.method]: true
-											};
+                                            if (!(element.library in methodCallNames)) {
+                                                methodCallNames[element.library] = {};
+                                            }
+                                            if (!(element.method in methodCallNames[element.library])) {
+                                                methodCallNames[element.library][element.method] = [];
+                                            }
+                                            methodCallNames[element.library][element.method].push(element.loc)
 										});
 
 									variableNames
@@ -247,24 +254,33 @@ async function getFunctions() {
 												objectifiedScript
 											);
 
+                                            if (!(element.library in methodCallNames)) {
+                                                methodCallNames[element.library] = {};
+                                            }
 											for (var key in info) {
-												methodCallNames[element.library] = {
-													...methodCallNames[element.library],
-													[key]: true
-												};
+                                                if (!(key in methodCallNames[element.library])) {
+                                                    methodCallNames[element.library][key] = [];
+                                                }
+                                                methodCallNames[element.library][key].push(element.loc);
 											}
 										});
 
 									if (Object.keys(methodCallNames).length > 0) {
+                                        fullMethods[jsFileName] = {};
 										Object.keys(methodCallNames).forEach(key => {
 											logFile.write(`Library: ${key}\n`);
 											logFile.write('Methods Called:\n');
+                                            fullMethods[jsFileName][key] = {};
 											Object.keys(methodCallNames[key]).forEach(method => {
 												logFile.write(`   - ${method}\n`);
-												fullMethods[key] = {
-													...fullMethods[key],
-													[method]: true
-												};
+												//fullMethods[key] = {
+											//		...fullMethods[key],
+											//		[method]: methodCallNames[key][method]
+											//	};
+                                                fullMethods[jsFileName][key] = {
+                                                    ...fullMethods[jsFileName][key],
+                                                    [method]: methodCallNames[key][method]
+                                                };
 											});
 											logFile.write('\n');
 										});
