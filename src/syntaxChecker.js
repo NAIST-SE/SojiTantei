@@ -205,7 +205,7 @@ async function getFunctions() {
 				var fullMethods = {};
 				var fileName = directoryName + '/' + element;
 				var logFile = fs.createWriteStream(fileName, { flags: 'w' });
-                //var functionCallJSONFile = fs.createWriteStream(fileName.slice(0, -4) + '.json', { flags: 'w'});
+                var functionTraceJSONFile = fs.createWriteStream(fileName.slice(0, -4) + '.json', { flags: 'w'});
 				for (let file in list[element].files) {
                     const jsFileName = list[element].files[file];
 					logFile.write('------------------------------------------\n');
@@ -298,7 +298,9 @@ async function getFunctions() {
 				}
 				logFile.write('\nAll of the Methods:\n');
 				logFile.write(JSON.stringify(fullMethods, null, 2));
+                functionTraceJSONFile.write(JSON.stringify(fullMethods, null, 2));
 				logFile.end();
+                functionTraceJSONFile.end();
 			});
 		});
 	}
