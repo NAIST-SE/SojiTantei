@@ -2,6 +2,8 @@ var nodegit = require('nodegit');
 var fs = require('fs');
 var config = require('./../configuration');
 
+const versionFileListDir = config.versionFileListDir;
+
 function getFileList() {
 	// This code walks the history of the master branch and prints results
 	// that look very similar to calling `git log` from the command line
@@ -25,7 +27,10 @@ function getFileList() {
 							});
 					}
 
-					var directoryName = 'fileLists/' + libraryName;
+					var directoryName = versionFileListDir + libraryName;
+					if (!fs.existsSync(versionFileListDir)) {
+						fs.mkdirSync(versionFileListDir);
+					}
 					if (!fs.existsSync(directoryName)) {
 						fs.mkdirSync(directoryName);
 					}

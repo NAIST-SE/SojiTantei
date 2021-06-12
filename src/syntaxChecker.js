@@ -3,6 +3,9 @@ let fs = require('fs');
 let esprima = require('esprima');
 var config = require('./../configuration');
 
+const versionFileListDir = config.versionFileListDir;
+const functionTraceListDir = config.functionTraceListDir;
+
 function getFileList() {
 	let list = {};
 	let libraryName = process.argv[2];
@@ -11,14 +14,14 @@ function getFileList() {
 		let fileLists =
 			passedFiles.length > 0
 				? passedFiles
-				: fs.readdirSync('fileLists/' + libraryName);
+				: fs.readdirSync(versionFileListDir + libraryName);
 
 		for (let file in fileLists) {
 			let count = 0;
 			let hash = '';
 			let data = fs
 				.readFileSync(
-					'fileLists/' + libraryName + '/' + fileLists[file],
+					versionFileListDir + libraryName + '/' + fileLists[file],
 					'utf8'
 				)
 				.toString()
@@ -188,9 +191,9 @@ async function getFunctions() {
 		config.directory + libraryName + '/.git'
 	);
 
-	var directoryName = 'filesMethods/' + libraryName;
-    if(!fs.existsSync('filesMethods')) {
-		fs.mkdirSync('filesMethods');
+	var directoryName = functionTraceListDir + libraryName;
+    if(!fs.existsSync(functionTraceListDir)) {
+		fs.mkdirSync(functionTraceListDir);
     }
 	if (!fs.existsSync(directoryName)) {
 		fs.mkdirSync(directoryName);
@@ -202,6 +205,7 @@ async function getFunctions() {
 				var fullMethods = {};
 				var fileName = directoryName + '/' + element;
 				var logFile = fs.createWriteStream(fileName, { flags: 'w' });
+                //var functionCallJSONFile = fs.createWriteStream(fileName.slice(0, -4) + '.json', { flags: 'w'});
 				for (let file in list[element].files) {
                     const jsFileName = list[element].files[file];
 					logFile.write('------------------------------------------\n');

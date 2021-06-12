@@ -2,6 +2,8 @@ var nodegit = require('nodegit');
 var fs = require('fs');
 var config = require('./../configuration');
 
+const versionFileListDir = config.versionFileListDir;
+
 async function getFileList() {
 	// This code walks the history of the master branch and prints results
 	// that look very similar to calling `git log` from the command line
@@ -20,9 +22,9 @@ async function getFileList() {
 
                 // After finish the commit history traversal, find the release commit for each version.
 				history.on('end', async function(commits) {
-					var directoryName = 'fileLists/' + libraryName;
-					if (!fs.existsSync('fileLists')) {
-						fs.mkdirSync('fileLists');
+					var directoryName = versionFileListDir + libraryName;
+					if (!fs.existsSync(versionFileListDir)) {
+						fs.mkdirSync(versionFileListDir);
 					}
 					if (!fs.existsSync(directoryName)) {
 						fs.mkdirSync(directoryName);

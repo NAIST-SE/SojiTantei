@@ -6,8 +6,15 @@ const input_command = argv._[0];
 const input_app = argv._[1];
 const { exec } = require('child_process');
 const { arch } = require('os');
-var exec_command = "";
 const command_len = argv._.length
+
+var config = require('./configuration');
+
+const versionFileListDir = config.versionFileListDir;
+const functionTraceListDir = config.functionTraceListDir;
+const functionComparisonListDir = config.functionComparisonListDir;
+
+var exec_command = "";
 var output_msg = ""
 
 if (command_len < 2) {
@@ -46,14 +53,14 @@ if (command_len < 2) {
 } else {
     if (command_len < 3) {
         if (input_command == "list-metafile-version"){
-            exec_command = "cd src && node getFilesPerRelease.js " + input_app;
-            output_msg = "Successful! Please see result at src/fileLists/" + input_app;
+            exec_command = "node src/getFilesPerRelease.js " + input_app;
+            output_msg = "Successful! Please see result at " + versionFileListDir + input_app;
         } else if (input_command == "list-tag-version") {
-            exec_command = "cd src && node getTags.js " + input_app;
-            output_msg = "Successful! Please see result at src/fileLists/" + input_app;;
+            exec_command = "node src/getTags.js " + input_app;
+            output_msg = "Successful! Please see result at " + versionFileListDir + input_app;
         } else if (input_command == "trace-call") {
-            exec_command = "cd src && node syntaxChecker.js " + input_app;
-            output_msg = "Successful! Please see result at src/filesMethods/" + input_app;;
+            exec_command = "node src/syntaxChecker.js " + input_app;
+            output_msg = "Successful! Please see result at " + functionTraceListDir + input_app;
         } else if (input_command == "compare-function") {
             console.log("You did not add the input correctly. Please add two desired versions to compare");
         }
@@ -64,15 +71,15 @@ if (command_len < 2) {
             console.log("Command was wrong");
         } else if (input_command == "trace-call") {
             if (command_len == 3) {
-                exec_command = "cd src && node syntaxChecker.js " + input_app + " " + argv._[2] + ".txt";
-                output_msg = "Successful! Please see result at src/filesMethods/" + input_app + "/" + argv._[2] + ".txt";
+                exec_command = "node src/syntaxChecker.js " + input_app + " R_" + argv._[2] + ".txt";
+                output_msg = "Successful! Please see result at " + functionTraceListDir + input_app + "/R_" + argv._[2] + ".txt";
             }
         } else if (input_command == "compare-function") {
             if (command_len == 3) {
                 console.log("You did not add the input correctly. Please add one more desired versions to compare.");
             } else if (command_len == 4) {
-                exec_command = "cd src && node getFunctions.js " + input_app + " " + argv._[2] + ".txt " + argv._[3] + ".txt";
-                output_msg = "Successful! Please see result at src/filesComparison/" + input_app + "/[" + argv._[2] + "]-[" + argv._[3] + "].txt";
+                exec_command = "node src/getFunctions.js " + input_app + " R_" + argv._[2] + ".txt R_" + argv._[3] + ".txt";
+                output_msg = "Successful! Please see result at " + functionComparisonListDir + input_app + "/[R_" + argv._[2] + "]-[R_" + argv._[3] + "].txt";
             }
         }
     }

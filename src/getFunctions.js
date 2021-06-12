@@ -6,6 +6,9 @@ let functionExtractor = require('function-extractor');
 let diff = require('deep-diff');
 var config = require('./../configuration');
 
+const versionFileListDir = config.versionFileListDir;
+const functionComparisonListDir = config.functionComparisonListDir;
+
 let functionsList = {};
 let libraryName = '';
 
@@ -20,14 +23,14 @@ function getFileList() {
 		let fileLists =
 			passedFiles.length > 0
 				? passedFiles
-				: fs.readdirSync('fileLists/' + libraryName);
+				: fs.readdirSync(versionFileListDir + libraryName);
 
 		for (let file in fileLists) {
 			let count = 0;
 			let hash = '';
 			let data = fs
 				.readFileSync(
-					'fileLists/' + libraryName + '/' + fileLists[file],
+					versionFileListDir + libraryName + '/' + fileLists[file],
 					'utf8'
 				)
 				.toString()
@@ -130,9 +133,9 @@ async function getFunctions() {
 function test() {
 	getFunctions()
 		.then(() => {
-			let directoryName = 'filesComparison/' + libraryName;
-			if (!fs.existsSync('filesComparison')) {
-				fs.mkdirSync('filesComparison');
+			let directoryName = functionComparisonListDir + libraryName;
+			if (!fs.existsSync(functionComparisonListDir)) {
+				fs.mkdirSync(functionComparisonListDir);
 			}
 			if (!fs.existsSync(directoryName)) {
 				fs.mkdirSync(directoryName);
