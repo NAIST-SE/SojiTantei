@@ -37,7 +37,6 @@ function getFileList() {
 	} else {
 		console.log('Please provide library name');
 	}
-
 	return list;
 }
 
@@ -108,7 +107,6 @@ const findRequestValue = object => {
 		if (key === 'callee' && result.value) {
 			return { ...result, finish: true, loc: object[key].loc};
 		}
-
 		if (result.finish) return result;
 	}
 
@@ -150,7 +148,6 @@ const getRequestData = object => {
 
 		if (result.variable && result.library) return result;
 	}
-
 	return result;
 };
 
@@ -168,7 +165,10 @@ const findMethodValue = (variable, object, result = {}) => {
 			methodFound = true;
 		} else if (key === 'property' && methodFound) {
 			methodFound = false;
-			result = { ...result, [object[key].name]: true };
+            if (!(object[key].name in result)) {
+                result[object[key].name] = [];
+            }
+            result[object[key].name].push(object[key].loc);
 		} else if (typeof value === 'object') {
 			result = findMethodValue(variable, value, result);
 		}
@@ -233,7 +233,7 @@ async function getFunctions() {
 									});
 
 									var methodCallNames = {};
-
+                                    
 									variableNames
 										.filter(element => element.method !== '')
 										.forEach(element => {
@@ -261,7 +261,7 @@ async function getFunctions() {
                                                 if (!(key in methodCallNames[element.library])) {
                                                     methodCallNames[element.library][key] = [];
                                                 }
-                                                methodCallNames[element.library][key].push(element.loc);
+                                                methodCallNames[element.library][key].push(info[key]);
 											}
 										});
 
@@ -273,10 +273,6 @@ async function getFunctions() {
                                             fullMethods[jsFileName][key] = {};
 											Object.keys(methodCallNames[key]).forEach(method => {
 												logFile.write(`   - ${method}\n`);
-												//fullMethods[key] = {
-											//		...fullMethods[key],
-											//		[method]: methodCallNames[key][method]
-											//	};
                                                 fullMethods[jsFileName][key] = {
                                                     ...fullMethods[jsFileName][key],
                                                     [method]: methodCallNames[key][method]
