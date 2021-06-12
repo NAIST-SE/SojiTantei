@@ -15,33 +15,11 @@ async function getFileList() {
 			})
 			.then(function(firstCommitOnMaster) {
 				// History returns an event.
-				var history = firstCommitOnMaster.history(nodegit.Revwalk.SORT.Time);
+				var history = firstCommitOnMaster.history();
 				var _entry;
-				var version = '';
-				var prevSha = '';
 
-				// History emits "commit" event for each commit in the branch's history
-				history.on('commit', function(commit) {
-					commit
-						.getEntry('package.json')
-						.then(function(entry) {
-							_entry = entry;
-							return _entry.getBlob();
-						})
-						.then(function(blob) {
-							var tmpVersion = JSON.parse(blob.toString()).version;
-							if (version !== tmpVersion) {
-								if (prevSha !== '')
-									if (!commitList[version]) commitList[version] = prevSha;
-							}
-							version = tmpVersion;
-							prevSha = commit.sha();
-						});
-				});
-
-				history.on('end', function() {
-					if (!commitList[version]) commitList[version] = prevSha;
-					console.log(commitList);
+                // After finish the commit history traversal, find the release commit for each version.
+				history.on('end', async function(commits) {
 					var directoryName = 'fileLists/' + libraryName;
 					if (!fs.existsSync('fileLists')) {
 						fs.mkdirSync('fileLists');
@@ -49,10 +27,23 @@ async function getFileList() {
 					if (!fs.existsSync(directoryName)) {
 						fs.mkdirSync(directoryName);
 					}
+                    for (var commit in commits) {
+                        await commits[commit]
+                            .getEntry('package.json')
+                            .then(function(entry) {
+                                _entry = entry;
+                                return _entry.getBlob();
+                            })
+                            .then(function(blob) {
+                                var currentVersion = JSON.parse(blob.toString()).version;
+                                commitList[currentVersion] = commits[commit].sha();
+                            });
+                    }
 
 					nodegit.Repository.open(
 						config.directory + libraryName + '/.git'
-					).then(async function(repo) {
+					)
+                    .then(async function(repo) {
 						for (var commitVersion in commitList) {
 							await repo
 								.getCommit(commitList[commitVersion])
@@ -88,6 +79,7 @@ async function getFileList() {
 									});
 								});
 						}
+                        console.log(commitList);
 					});
 				});
 
