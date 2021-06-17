@@ -1,6 +1,6 @@
 {
     "name": "sojitantei",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "SojiTantei a tool for analyzing nodeJS projects",
     "main": "index.js",
     "author": [
